@@ -20,7 +20,7 @@ int duty1=25;
 int duty2=25;
 float mil,sec=0,t,In, Out, rk, rk1;
 float Out1,Out2,Out1a,Out1b,Out2a,Out2b;
-float e,u,SPo,Kp=1.0;
+float e,u,SPo,Kp=5.0,SensorC=0;
 float shuntvoltage1 = 0;
   float busvoltage1 = 0;
   float current_mA1 = 0;
@@ -91,7 +91,7 @@ ISR(TIMER0_COMPA_vect){          // timer 0  (cada 1 mS)
  //rk1 = rk;
  
 
- //Out1 = 255.0*sin(2.0*PI*0.2*t);     // SENO para EL PIN D3, D4 y D5
+ Out1 = 255.0*sin(2.0*PI*0.2*t);     // SENO para EL PIN D3, D4 y D5
  Out2 = 255.0*sin(2.0*PI*0.2*t);    // SENO para EL PIN D11, D10 y D9
 
  if (Out1 >= 0.0) {  Out1a = Out1;digitalWrite(D4,HIGH);digitalWrite(D5,LOW);OCR2B  =  Out1a; flag = 1;} // D4 y D5 Compuerta AND seno POSITIVO
@@ -99,11 +99,13 @@ else { Out1b = abs(Out1);digitalWrite(D4,LOW);digitalWrite(D5,HIGH);OCR2B  =  ab
 
 if (Out2 >= 0.0) {  Out2a = Out2;digitalWrite(D10,HIGH);digitalWrite(D9,LOW);OCR2A=Out2a;} // D10 y D9 Compuerta AND seno POSITIVO
 else { Out2b = abs(Out2);digitalWrite(D10,LOW);digitalWrite(D9,HIGH);OCR2A=abs(Out2);} // D10 y 9 Compuerta AND seno NEGATIVO
-
-SPo=150.0*sin(2.0*PI*0.2*t);
-e=SPo-current_mA1;
+/*
+SPo=100.0*sin(2.0*PI*0.2*t);
+e=SPo-SensorC;
 u=Kp*e;
+u=constrain(u,0,255);
 Out1=u;
+*/
 }
 
 void loop() {
@@ -112,11 +114,14 @@ void loop() {
   double senmap=5.0*sen/1024.0;
 //Serial.println(senmap);
  //Serial.print(",");
+ //****************
+ /*
  Serial.print(Out1a);
  Serial.print(",");
  Serial.print(Out1b);
  Serial.print(",");
-
+*/
+//*********************
 //**********************************************************************
 
 //*************************INA3221*************************************
@@ -129,12 +134,31 @@ void loop() {
   current_mA1 = -ina3221.getCurrent_mA(LIPO_BATTERY_CHANNEL);  // minus is to get the "sense" right.   - means the battery is charging, + that it is discharging
   loadvoltage1 = busvoltage1 + (shuntvoltage1 / 1000);
   
+  if(flag == true)
+  {
+    SensorC=current_mA1;
+  }
+  else if(flag == false)
+  {
+    SensorC=-1*current_mA1;
+  }
+    
     //Serial.print("LIPO_Battery Bus Voltage:   "); Serial.print(busvoltage1); Serial.println(" V");
     //Serial.print("LIPO_Battery Shunt Voltage: "); Serial.print(shuntvoltage1); Serial.println(" mV");
     //Serial.print("LIPO_Battery Load Voltage:  "); Serial.print(loadvoltage1); Serial.println(" V");
 //Serial.print("LIPO_Battery Current 1:       "); Serial.print(current_mA1); Serial.print(" mA");
 //Serial.print(",");
  //*******************************************************************
+/*
+Serial.print(u);
+Serial.print(",");
+Serial.print(e);
+Serial.print(",");
+*/
+Serial.print(Out1);
+Serial.print(",");
+Serial.println(SensorC);
+/*
 if(flag == 1)
 {
   Serial.println(current_mA1);
@@ -143,4 +167,5 @@ else if(flag ==0)
 {
   Serial.println(-1*current_mA1);
 }
+*/
 }
