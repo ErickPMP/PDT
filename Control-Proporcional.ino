@@ -19,7 +19,7 @@ int duty1=25;
 int duty2=25;
 float mil,sec=0,t;
 float Out1,Out2,Out1a,Out1b,Out2a,Out2b;
-float e,u,un,en,SPo,Kp=20,SensorC=0;
+float e,u,un,en,SPo,Kp=11,SensorC=0;
 float shuntvoltage1 = 0;
 float busvoltage1 = 0;
 float current_mA1 = 0;
@@ -85,8 +85,10 @@ ISR(TIMER0_COMPA_vect){          // timer 0  (cada 1 mS)
  //Out1 = 255.0*sin(2.0*PI*0.2*t);     // SENO para EL PIN D3, D4 y D5
  Out2 = 255.0*sin(2.0*PI*0.2*t);    // SENO para EL PIN D11, D10 y D9
 
-SPo=180.0*sin(2.0*PI*0.2*t);
-e=SPo-SensorC;
+SPo=100.0*sin(2.0*PI*0.2*t);
+if(SPo>SensorC){e=SPo-SensorC;}
+else{e=SensorC-SPo;}
+
 if(e<0){en=e;e=-e;}
 else{en=e;e=e;}
 u=Kp*e;
